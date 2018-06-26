@@ -1,5 +1,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/20726fae0d4326316bbc/maintainability)](https://codeclimate.com/github/thomaswhitcomb/mini-scheme/maintainability)
 
+[![Build Status](https://travis-ci.org/thomaswhitcomb/mini-scheme.svg?branch=master)](https://travis-ci.org/thomaswhitcomb/mini-scheme)
+
 # mini-scheme
 
 A simple,embed-able lisp interpreter implemented in Golang.
