@@ -22,53 +22,59 @@ func evalSequence(env *envirs, cells *cell) *cell {
 	}
 	return head
 }
+func evalList(env *envirs, s *cell) *cell {
+	cells := s.list()
+	// functor is a scalar
+	fs := eval(env, cells)
+	if fs.isLambda() {
+		fn := fs.lambda()
+		head := evalSequence(env, cells.next)
+		return fn(env, head)
+	}
+	if fs.isSymbol() {
+		var ok bool
+		var fd *fundef
+		if fd, ok = funcs[*fs.symbol()]; !ok {
+			fmt.Printf("Can not find function: %s\n", *fs.symbol())
+			return makeFalse()
+		}
+		if fd.arityMin > cells.next.size() || fd.arityMax < cells.next.size() {
+			fmt.Printf("Invalid arity on function %s\n", *fs.symbol())
+			return makeFalse()
+		}
+		if _, ok = specialFuncs[*fs.symbol()]; ok {
+			return fd.ep(env, cells.next)
+		} else {
+			head := evalSequence(env, cells.next)
+			return fd.ep(env, head)
+		}
+	}
+	fmt.Printf("Can not find function: %s\n", *fs.show())
+	return makeFalse()
+}
+
+func evalScalar(env *envirs, s *cell) *cell {
+	var v *cell
+	var b bool
+	v = env.find(*s.show())
+	if v != nil {
+		return v.clone()
+	}
+	v, b = vars[*s.show()]
+	if b {
+		return v.clone()
+	}
+	return s.clone()
+}
 
 func eval(env *envirs, s *cell) *cell {
 	if s == nil {
 		return makeList(nil)
 	}
 	if s.isScalar() {
-		var v *cell
-		var b bool
-		v = env.find(*s.show())
-		if v != nil {
-			return v.clone()
-		}
-		v, b = vars[*s.show()]
-		if b {
-			return v.clone()
-		}
-		return s.clone()
-	} else {
-		cells := s.list()
-		// functor is a scalar
-		fs := eval(env, cells)
-		if fs.isLambda() {
-			fn := fs.lambda()
-			head := evalSequence(env, cells.next)
-			return fn(env, head)
-		}
-		if fs.isSymbol() {
-			var ok bool
-			var fd *fundef
-			if fd, ok = funcs[*fs.symbol()]; !ok {
-				fmt.Printf("Can not find function: %s\n", *fs.symbol())
-				return makeFalse()
-			}
-			if fd.arityMin > cells.next.size() || fd.arityMax < cells.next.size() {
-				fmt.Printf("Invalid arity on function %s\n", *fs.symbol())
-				return makeFalse()
-			}
-			if _, ok = specialFuncs[*fs.symbol()]; ok {
-				return fd.ep(env, cells.next)
-			} else {
-				head := evalSequence(env, cells.next)
-				return fd.ep(env, head)
-			}
-		}
-		fmt.Printf("Can not find function: %s\n", *fs.show())
+		return evalScalar(env, s)
 	}
-	return makeFalse()
+	return evalList(env, s)
 }
 
 func run(text string) []string {
