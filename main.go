@@ -36,17 +36,17 @@ func evalList(env *envirs, s *cell) *cell {
 		var fd *fundef
 		if fd, ok = funcs[*fs.symbol()]; !ok {
 			fmt.Printf("Can not find function: %s\n", *fs.symbol())
-			return makeFalse()
-		}
-		if fd.arityMin > cells.next.size() || fd.arityMax < cells.next.size() {
-			fmt.Printf("Invalid arity on function %s\n", *fs.symbol())
-			return makeFalse()
-		}
-		if _, ok = specialFuncs[*fs.symbol()]; ok {
-			return fd.ep(env, cells.next)
 		} else {
-			head := evalSequence(env, cells.next)
-			return fd.ep(env, head)
+			if fd.arityMin > cells.next.size() || fd.arityMax < cells.next.size() {
+				fmt.Printf("Invalid arity on function %s\n", *fs.symbol())
+			} else {
+				if _, ok = specialFuncs[*fs.symbol()]; ok {
+					return fd.ep(env, cells.next)
+				} else {
+					head := evalSequence(env, cells.next)
+					return fd.ep(env, head)
+				}
+			}
 		}
 	}
 	fmt.Printf("Can not find function: %s\n", *fs.show())
