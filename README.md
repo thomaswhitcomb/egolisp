@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/thomaswhitcomb/mini-scheme.svg?branch=master)](https://travis-ci.org/thomaswhitcomb/mini-scheme)
 
-# mini-scheme
+# egolisp
 
 A simple,embed-able lisp interpreter implemented in Golang.
 
